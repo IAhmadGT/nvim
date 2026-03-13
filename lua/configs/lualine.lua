@@ -3,22 +3,20 @@
 -- }
 local lualine = require('lualine')
 
--- Catpuccine Color Palette
+-- Catppuccin Mocha Palette
 local colors = {
-  bg       = '#181825',  -- Background
-  fg       = '#D9E0EE',  -- Foreground
-
-  blue     = '#89b4fa',  -- Blue
-  cyan     = '#A7D8D3',  -- Cyan
-  green    = '#a6e3a1',  -- Green
-  violet   = '#CBA6F7',  -- Violet
-  magenta  = '#F5A97F',  -- Magenta
-  red      = '#f38ba8',  -- Red
-  yellow   = '#f9e2af',  -- Yellow
-  orange   = '#fab387',  -- Orange
-
-  darkblue = '#24283B',  -- Darker Blue for accents
-  white    = '#D9E0EE',  -- White
+  bg       = '#181825',
+  fg       = '#D9E0EE',
+  blue     = '#89b4fa',
+  cyan     = '#A7D8D3',
+  green    = '#a6e3a1',
+  violet   = '#CBA6F7',
+  magenta  = '#F5A97F',
+  red      = '#f38ba8',
+  yellow   = '#f9e2af',
+  orange   = '#fab387',
+  darkblue = '#24283B',
+  white    = '#D9E0EE',
 }
 
 local conditions = {
@@ -30,6 +28,15 @@ local conditions = {
   end,
 }
 
+-- Debug Mode State
+local dmode_enabled = false
+vim.api.nvim_create_autocmd("User", {
+  pattern = "DebugModeChanged",
+  callback = function(args)
+    dmode_enabled = args.data.enabled
+  end
+})
+
 local config = {
   options = {
     component_separators = '',
@@ -38,22 +45,15 @@ local config = {
       normal   = { c = { fg = colors.fg, bg = colors.bg } },
       inactive = { c = { fg = colors.fg, bg = colors.bg } },
     },
+    globalstatus = true,
   },
   sections = {
-    lualine_a = {},
-    lualine_b = {},
-    lualine_y = {},
-    lualine_z = {},
-    lualine_c = {},
-    lualine_x = {},
+    lualine_a = {}, lualine_b = {}, lualine_y = {},
+    lualine_z = {}, lualine_c = {}, lualine_x = {},
   },
   inactive_sections = {
-    lualine_a = {},
-    lualine_b = {},
-    lualine_y = {},
-    lualine_z = {},
-    lualine_c = {},
-    lualine_x = {},
+    lualine_a = {}, lualine_b = {}, lualine_y = {},
+    lualine_z = {}, lualine_c = {}, lualine_x = {},
   },
 }
 
@@ -65,16 +65,22 @@ local function ins_right(component)
   table.insert(config.sections.lualine_x, component)
 end
 
--- Left accent bar
+-------------------------------------------------------------------------------
+-- left side
+-------------------------------------------------------------------------------
+
+-- Decorative Bar
 ins_left {
   function() return '▊' end,
-  color = { fg = colors.bg },
-  padding = { left = 0, right = 0 },
+  color = { fg = colors.blue },
+  padding = { left = 0, right = 1 },
 }
 
--- Mode
+-- Mode Component
 ins_left {
-  'mode',
+  function()
+    return dmode_enabled and "DEBUG" or require('lualine.utils.mode').get_mode()
+  end,
   color = function()
     local mode_color = {
       n  = colors.blue,
@@ -87,55 +93,40 @@ ins_left {
       r  = colors.orange,
       t  = colors.red,
     }
-
-    local m = vim.fn.mode()
-    local col = mode_color[m] or colors.blue
-
     return {
-      fg = colors.bg,   -- text becomes dark
-      bg = col,         -- mode color becomes background
+      bg = dmode_enabled and colors.red or mode_color[vim.fn.mode()] or colors.blue,
+      fg = colors.bg,
       gui = 'bold',
     }
   end,
   padding = { left = 1, right = 1 },
 }
 
--- Filename 
+-- Filename with Icon
 ins_left {
   function()
     local filename = vim.fn.expand('%:t')
-    if filename == '' then
-      return ''
-    end
-    local icon = require('nvim-web-devicons')
-      .get_icon(filename, nil, { default = true })
-    return string.format(' %s %s', icon or '', filename)
+    if filename == '' then return '' end
+    local icon, _ = require('nvim-web-devicons').get_icon(filename, nil, { default = true })
+    return icon .. ' ' .. filename
   end,
   cond = conditions.buffer_not_empty,
   color = function()
-    local filename = vim.fn.expand('%:t')
-    local devicons = require('nvim-web-devicons')
-    local _, icon_color = devicons.get_icon_color(filename, nil, { default = true })
-
-    -- If modified, override colour
     if vim.bo.modified then
       return { fg = colors.yellow, gui = 'bold' }
     end
-
-    -- Otherwise use icon color
+    local _, icon_color = require('nvim-web-devicons').get_icon_color(vim.fn.expand('%:t'), nil, { default = true })
     return { fg = icon_color or colors.white, gui = 'bold' }
   end,
-  padding = { right = 1 },
 }
 
--- Git branch
+-- Git info
 ins_left {
   'branch',
   icon = '',
-  color = { fg = colors.cyan, gui = 'bold' },
+  color = { fg = colors.violet, gui = 'bold' },
 }
 
--- Git diff
 ins_left {
   'diff',
   symbols = { added = ' ', modified = '󰝤 ', removed = ' ' },
@@ -146,6 +137,10 @@ ins_left {
   },
   cond = conditions.hide_in_width,
 }
+
+-------------------------------------------------------------------------------
+-- right side
+-------------------------------------------------------------------------------
 
 ins_right {
   'searchcount',
@@ -163,55 +158,37 @@ ins_right {
   },
 }
 
--- LSP
+-- LSP Clients
 ins_right {
   function()
     local clients = vim.lsp.get_clients({ bufnr = 0 })
-    if #clients == 0 then
-      return ''
-    end
-
-    if vim.fn.winwidth(0) < 80 then
-      return ' '
-    end
-
+    if #clients == 0 then return ' ' end
+    if vim.fn.winwidth(0) < 80 then return ' ' end
     local names = {}
     for _, client in ipairs(clients) do
       table.insert(names, client.name)
     end
-    return table.concat(names, ', ')
+    return table.concat(names, '|')
   end,
   icon = '',
-  color = { fg = colors.green, gui = 'bold' },
-  padding = { left = 0, right = 0 },
+  color = { fg = colors.white, gui = 'bold' },
 }
 
 -- Location
 ins_right {
   function()
-    local line = vim.fn.line('.')
-    local col = vim.fn.virtcol('.')
-    return string.format('Ln %d, Col %d ', line, col)
+    return string.format('Ln %d, Col %d', vim.fn.line('.'), vim.fn.virtcol('.'))
   end,
-  color = { fg = colors.cyan },
-  padding = { left = 1, right = 0 },
+  color = { fg = colors.white },
 }
 
--- Encoding
-ins_right {
-  'o:encoding',
-  fmt = string.upper,
-  cond = conditions.hide_in_width,
-  color = { fg = colors.green, gui = 'bold' },
-}
-
+-- Working Directory
 ins_right {
   function()
-    return vim.fn.fnamemodify(vim.fn.expand('%:p:h'), ':t')
+    return vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
   end,
-  icon = '󰉋 ',
-  cond = conditions.buffer_not_empty,
-  color = { fg = colors.bg, bg = colors.blue, gui = 'bold' },
+  icon = '󰉋',
+  color = { bg = colors.blue, fg = colors.bg, gui = 'bold' },
   padding = { left = 1, right = 1 },
 }
 
