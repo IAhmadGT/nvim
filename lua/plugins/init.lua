@@ -210,7 +210,7 @@ return {
       "mfussenegger/nvim-dap",
     },
     opts = {
-      ensure_installed = { "codelldb", "cpptools" },
+      ensure_installed = { "codelldb" },
       automatic_setup = true,
     },
   },
@@ -241,12 +241,6 @@ return {
         },
       }
 
-      dap.adapters.cppdbg = {
-        id = 'cppdbg',
-        type = 'executable',
-        command = fn.stdpath("data") .. '/mason/bin/OpenDebugAD7',
-      }
-
       local cpp_config = {
         {
           name = "Launch executable (CodeLLDB)",
@@ -257,23 +251,6 @@ return {
           end,
           cwd = "${workspaceFolder}",
           stopOnEntry = false,
-        },
-        {
-          name = "Launch executable (CppTools)",
-          type = "cppdbg",
-          request = "launch",
-          program = function()
-            return fn.input("Path to executable: ", fn.getcwd() .. "/", "file")
-          end,
-          cwd = "${workspaceFolder}",
-          stopAtEntry = false,
-          setupCommands = {
-            {
-              text = '-enable-pretty-printing',
-              description = 'enable pretty printing',
-              ignoreFailures = false
-            },
-          },
         },
       }
       dap.configurations.cpp = cpp_config
