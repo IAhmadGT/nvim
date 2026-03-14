@@ -21,16 +21,18 @@ local default_header = {
     },
 }
 
-local stats = ""
-local ok, lazy = pcall(require, "lazy")
-if ok then
-    local s = lazy.stats()
-    stats = "󰚥 " .. s.count .. " plugins loaded in " .. math.floor(s.startuptime + 0.5) .. "ms"
-end
-
 local footer = {
     type = "text",
-    val = stats,
+    val = function()
+        local stats = ""
+        local ok, lazy = pcall(require, "lazy")
+        if ok then
+            local s = lazy.stats()
+            local ms = (math.floor(s.startuptime + 0.5))
+            stats = "󰚥 " .. s.count .. " plugins loaded in " .. ms .. "ms"
+        end
+        return stats
+    end,
     opts = {
         position = "center",
         hl = "Number",
