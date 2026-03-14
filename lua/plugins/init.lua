@@ -26,8 +26,9 @@ return {
   {
     "goolord/alpha-nvim",
     config = function()
-      require("alpha").setup(require("alpha.themes.dashboard").config)
-    end,
+        local dashboard = require('configs.dashboard')
+        require("alpha").setup(dashboard.config)
+    end
   },
   {
     "nvim-lualine/lualine.nvim",
