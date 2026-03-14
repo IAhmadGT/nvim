@@ -233,11 +233,16 @@ return {
       local dap = require("dap")
       local fn = vim.fn
 
+      local is_termux = os.getenv("TERMUX_VERSION") ~= nil
+      local mason_path = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb"
+
+      local cmd = (is_termux or vim.fn.executable(mason_path) == 0) and "codelldb" or mason_path
+
       dap.adapters.codelldb = {
         type = "server",
         port = "${port}",
         executable = {
-          command = fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb",
+          command = cmd,
           args = { "--port", "${port}" },
         },
       }
