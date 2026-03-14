@@ -23,21 +23,23 @@ local default_header = {
 
 local footer = {
     type = "text",
-    val = function()
-        local stats = ""
-        local ok, lazy = pcall(require, "lazy")
-        if ok then
-            local s = lazy.stats()
-            local ms = (math.floor(s.startuptime + 0.5))
-            stats = "󰚥 " .. s.count .. " plugins loaded in " .. ms .. "ms"
-        end
-        return stats
-    end,
+    val = "Loading plugins...",
     opts = {
         position = "center",
         hl = "Number",
     },
 }
+
+vim.api.nvim_create_autocmd("User", {
+    pattern = "LazyVimStarted",
+    callback = function()
+        local stats = require("lazy").stats()
+        local ms = math.floor(stats.startuptime + 0.5)
+
+        footer.val = "󰚥 " .. stats.count .. " plugins loaded in " .. ms .. "ms"
+        pcall(vim.cmd.AlphaRedraw)
+    end,
+})
 
 local leader = "SPC"
 
