@@ -29,7 +29,6 @@ return {
         draw = {
           columns = { { 'kind_icon', gap = 1 }, { 'label', gap = 1 } },
           components = {
-            -- 1. Use colorful-menu for the main label
             label = {
               text = function(ctx)
                 return require("colorful-menu").blink_components_text(ctx)
@@ -52,7 +51,6 @@ return {
               end,
             },
 
-            -- 2. Use nvim-highlight-colors for the icon (color swatches)
             kind_icon = {
               text = function(ctx)
                 local icon = ctx.kind_icon
@@ -84,7 +82,7 @@ return {
     },
 
     fuzzy = {
-      implementation = "prefer_rust_with_warning",
+      implementation = "prefer_rust",
       sorts = { 'exact', 'score', 'sort_text' },
     },
 }
