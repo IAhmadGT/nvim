@@ -105,9 +105,10 @@ vim.lsp.config.lua_ls = {
 
 -- C / C++
 vim.lsp.config.clangd = {
+  filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
   cmd = {
     "clangd",
-    "--query-driver=**",
+    "--compile-commands-dir=build",
     "--all-scopes-completion",
     "--background-index",
     "--clang-tidy",
@@ -136,10 +137,20 @@ vim.lsp.config["asm-lsp"] = {
 
 -- QML
 vim.lsp.config.qmlls = {
-  cmd = { "qmlls", "-E" }
+  cmd = { "qmlls", "-E" },
+  filetypes = { "qml", "qmljs" },
 }
 
--- Simple Servers (using defaults)
+-- CMake 
+vim.lsp.config.neocmake = {
+  cmd = { "neocmakelsp", "stdio" },
+  filetypes = { "cmake" },
+  root_dir = require("lspconfig.util").root_pattern(
+    "CMakeLists.txt",
+    ".git"
+  ),
+}
+
 local servers = {
   "bashls",
   "cssls",
@@ -149,7 +160,8 @@ local servers = {
 }
 
 for _, lsp in ipairs(servers) do
-  vim.lsp.config[lsp] = vim.lsp.config[lsp] or {}
+  local default_config = require('lspconfig.configs.' .. lsp).default_config
+  vim.lsp.config[lsp] = vim.tbl_deep_extend("force", default_config, vim.lsp.config[lsp] or {})
 end
 
 -- Enable all configured servers

@@ -32,6 +32,7 @@ return {
   },
   {
     "nvim-lualine/lualine.nvim",
+    event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = function()
       return require "configs.lualine"
@@ -39,10 +40,12 @@ return {
   },
   {
     "nvim-tree/nvim-web-devicons",
+    lazy = true,
     opts = {},
   },
   {
     "lukas-reineke/indent-blankline.nvim",
+    event = "BufReadPost",
     main = "ibl",
     opts = {
       indent = { char = "│" },
@@ -63,6 +66,7 @@ return {
   },
   {
     "ibhagwan/fzf-lua",
+    cmd = "FzfLua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {},
   },
@@ -97,6 +101,7 @@ return {
   {
     "saghen/blink.cmp",
     version = "1.*",
+    event = "InsertEnter",
     dependencies = {
       "xzbdmw/colorful-menu.nvim",
       "brenoprata10/nvim-highlight-colors",
@@ -153,6 +158,7 @@ return {
   },
   {
     "brenoprata10/nvim-highlight-colors",
+    event = "BufReadPost",
     config = function()
       require("nvim-highlight-colors").setup({
         render = "virtual",
@@ -161,13 +167,20 @@ return {
       })
     end,
   },
+  {
+    'stevearc/overseer.nvim',
+    ---@module 'overseer'
+    ---@type overseer.SetupOpts
+    cmd = { "OverseerRun", "OverseerToggle" },
+    opts = {},
+  },
 
   -----------------------------------------------------------------------------
   -- git
   -----------------------------------------------------------------------------
   {
     "lewis6991/gitsigns.nvim",
-    event = "User FilePost",
+    event = { "BufReadPost", "BufNewFile" },
     opts = function()
       return require "configs.gitsigns"
     end,
@@ -187,7 +200,7 @@ return {
   },
   {
     "OXY2DEV/markview.nvim",
-    lazy = false,
+    ft = { "markdown" },
     dependencies = { "saghen/blink.cmp" },
     opts = {
       preview = { icon_provider = "devicons" },
@@ -277,6 +290,7 @@ return {
   {
     "MironPascalCaseFan/debugmaster.nvim",
     dependencies = { "mfussenegger/nvim-dap" },
+    cmd = { "Debugmaster", "DapContinue" },
     config = function()
       local dm = require("debugmaster")
       vim.keymap.set({ "n", "v" }, "<leader>dd", dm.mode.toggle, { nowait = true }, {desc = "Run Debugger"})

@@ -74,9 +74,9 @@ map("n", "<leader>fsp", function()
 end, { desc = "Grep in Neovim config" })
 
 -- NixOS Config
-map("n", "<leader>fn", function()
-  require("telescope.builtin").find_files({
-    cwd = "~/nixos/",
-    prompt_title = "NixOS Config",
-  })
-end, { desc = "Search NixOS config" })
+-- map("n", "<leader>fn", function()
+--   require("telescope.builtin").find_files({
+--     cwd = "~/nixos/",
+--     prompt_title = "NixOS Config",
+--   })
+-- end, { desc = "Search NixOS config" })

@@ -92,9 +92,9 @@ local buttons = {
         button("SPC f p", "  Neovim config", function()
             require("telescope.builtin").find_files({ cwd = vim.fn.stdpath("config"), prompt_title = "Neovim Config" })
         end),
-        button("SPC f n", "  NixOS config", function()
-            require("telescope.builtin").find_files({ cwd = "~/nixos/", prompt_title = "NixOS Config" })
-        end),
+        -- button("SPC f n", "  NixOS config", function()
+        --     require("telescope.builtin").find_files({ cwd = "~/nixos/", prompt_title = "NixOS Config" })
+        -- end),
     },
     opts = {
         spacing = 1,
