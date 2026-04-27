@@ -290,7 +290,6 @@ return {
   {
     "MironPascalCaseFan/debugmaster.nvim",
     dependencies = { "mfussenegger/nvim-dap" },
-    cmd = { "Debugmaster", "DapContinue" },
     config = function()
       local dm = require("debugmaster")
       vim.keymap.set({ "n", "v" }, "<leader>dd", dm.mode.toggle, { nowait = true }, {desc = "Run Debugger"})
