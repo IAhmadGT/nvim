@@ -42,6 +42,13 @@ end
 -------------------------------------------------------------------------------
 -- lsp keymaps (on_attach)
 -------------------------------------------------------------------------------
+
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+     local client = vim.lsp.get_client_by_id(args.data.client_id)
+     client.server_capabilities.semanticTokensProvider = nil
+ end, });
+
 local function lsp_on_attach(ev)
   local client = vim.lsp.get_client_by_id(ev.data.client_id)
   local bufnr = ev.buf
@@ -108,6 +115,8 @@ vim.lsp.config.clangd = {
   filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
   cmd = {
     "clangd",
+    "-j=4",
+    "--pch-storage=memory",
     "--compile-commands-dir=build",
     "--all-scopes-completion",
     "--background-index",
@@ -115,7 +124,6 @@ vim.lsp.config.clangd = {
     "--completion-style=detailed",
     "--header-insertion=iwyu",
     "--limit-results=70",
-    "--pch-storage=disk",
     "--log=error",
     "--suggest-missing-includes",
   },
