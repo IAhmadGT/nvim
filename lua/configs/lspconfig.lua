@@ -188,7 +188,6 @@ vim.lsp.config["glsl_analyzer"] = {
 local servers = {
   "lua_ls",
   -- "bashls",
-  "clangd",
   -- "cssls",
   "neocmake",
   -- "nixd",
