@@ -4,8 +4,8 @@
 local diagnostic_signs = {
   Error = " ",
   Warn  = " ",
-  Hint  = "",
-  Info  = "",
+  Hint  = " ",
+  Info  = " ",
 }
 
 vim.diagnostic.config({
@@ -43,11 +43,11 @@ end
 -- lsp keymaps (on_attach)
 -------------------------------------------------------------------------------
 
-vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(args)
-     local client = vim.lsp.get_client_by_id(args.data.client_id)
-     client.server_capabilities.semanticTokensProvider = nil
- end, });
+-- vim.api.nvim_create_autocmd("LspAttach", {
+--   callback = function(args)
+--      local client = vim.lsp.get_client_by_id(args.data.client_id)
+--      client.server_capabilities.semanticTokensProvider = nil
+--  end, });
 
 local function lsp_on_attach(ev)
   local client = vim.lsp.get_client_by_id(ev.data.client_id)
@@ -127,6 +127,24 @@ vim.lsp.config.clangd = {
     "--log=error",
     "--suggest-missing-includes",
   },
+  root_markers = {
+    '.clangd',
+    '.clang-tidy',
+    '.clang-format',
+    'compile_commands.json',
+    'compile_flags.txt',
+    'configure.ac',
+    '.git',
+  },
+}
+
+-- C#
+vim.lsp.config["roslyn"] = {
+    cmd = {
+        "roslyn-language-server",
+        "--stdio",
+     -- "--extension=/path/to/Roslynator.dll",
+    },
 }
 
 -- Typst
@@ -159,12 +177,26 @@ vim.lsp.config.neocmake = {
   ),
 }
 
+-- GLSL
+vim.lsp.config["glsl_analyzer"] = {
+  cmd = { 'glsl_analyzer' },
+  filetypes = { 'glsl', 'vert', 'tesc', 'tese', 'frag', 'geom', 'comp' },
+  root_markers = { '.git' },
+  capabilities = {},
+}
+
 local servers = {
-  "bashls",
-  "cssls",
+  "lua_ls",
+  -- "bashls",
+  "clangd",
+  -- "cssls",
   "neocmake",
-  "nixd",
-  "basedpyright"
+  -- "nixd",
+  -- "qmlls",
+  -- "tinymist",
+  "basedpyright",
+  -- "asm-lsp",
+  "glsl_analyzer"
 }
 
 for _, lsp in ipairs(servers) do
@@ -175,13 +207,14 @@ end
 -- Enable all configured servers
 vim.lsp.enable({
   "lua_ls",
-  "bashls",
+  -- "bashls",
   "clangd",
-  "cssls",
+  -- "cssls",
   "neocmake",
-  "nixd",
-  "qmlls",
+  -- "nixd",
+  -- "qmlls",
   "tinymist",
   "basedpyright",
-  "asm-lsp"
+  -- "asm-lsp",
+  "glsl_analyzer"
 })

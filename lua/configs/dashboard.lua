@@ -1,5 +1,13 @@
 local if_nil = vim.F.if_nil
 
+vim.api.nvim_set_hl(0, "AlphaLineOrange", { fg = "#ff9e64" })
+vim.api.nvim_create_autocmd("ColorScheme", {
+    pattern = "*",
+    callback = function()
+        vim.api.nvim_set_hl(0, "AlphaLineOrange", { fg = "#ff9e64" })
+    end,
+})
+
 local default_header = {
     type = "text",
     val = {
@@ -18,6 +26,15 @@ local default_header = {
     opts = {
         position = "center",
         hl = "Function",
+    },
+}
+
+local line = {
+    type = "text",
+    val = "──────────────────────────────────────────────────",
+    opts = {
+        position = "center",
+        hl = "AlphaLineOrange",
     },
 }
 
@@ -83,18 +100,15 @@ end
 local buttons = {
     type = "group",
     val = {
+        button("SPC f f", "  Find file",         "<cmd>Telescope find_files<CR>"),
+        button("SPC f o", "󰈚  Recent files",       "<cmd>Telescope oldfiles<CR>"),
+        button("SPC f w", "  Find word (Grep)",   "<cmd>Telescope live_grep<CR>"),
+        button("SPC f a", "󰈈  Find all files",     "<cmd>Telescope find_files follow=true no_ignore=true hidden=true<CR>"),
         button("e",       "  New file",          "<cmd>ene <CR>"),
-        button("SPC f f", "󰈞  Find file",         "<cmd>Telescope find_files<CR>"),
-        button("SPC f a", "󰭄  Find all files",     "<cmd>Telescope find_files follow=true no_ignore=true hidden=true<CR>"),
-        button("SPC f o", "󰊄  Recent files",       "<cmd>Telescope oldfiles<CR>"),
-        button("SPC f w", "󰈬  Find word (Grep)",   "<cmd>Telescope live_grep<CR>"),
-        button("SPC m a", "  Jump to bookmarks",   "<cmd>Telescope marks<CR>"),
-        button("SPC f p", "  Neovim config", function()
+        button("SPC m a", "  Jump to bookmarks",   "<cmd>Telescope marks<CR>"),
+        button("SPC f p", "  Neovim config", function()
             require("telescope.builtin").find_files({ cwd = vim.fn.stdpath("config"), prompt_title = "Neovim Config" })
         end),
-        -- button("SPC f n", "  NixOS config", function()
-        --     require("telescope.builtin").find_files({ cwd = "~/nixos/", prompt_title = "NixOS Config" })
-        -- end),
     },
     opts = {
         spacing = 1,
@@ -104,6 +118,7 @@ local buttons = {
 local section = {
     header = default_header,
     buttons = buttons,
+    line = line,
     footer = footer,
 }
 
@@ -113,8 +128,12 @@ local config = {
         section.header,
         { type = "padding", val = 2 },
         section.buttons,
-        { type = "padding", val = 2 },
+        { type = "padding", val = 1 },
+        section.line,
+        { type = "padding", val = 0 }, 
         section.footer,
+        { type = "padding", val = 0 },
+        section.line,
     },
     opts = {
         margin = 5,

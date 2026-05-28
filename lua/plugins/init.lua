@@ -99,6 +99,12 @@ return {
     end,
   },
   {
+    "seblyng/roslyn.nvim",
+    ---@module 'roslyn.config'
+    ---@type RoslynNvimConfig
+    opts = {},
+  },
+  {
     "saghen/blink.cmp",
     version = "1.*",
     event = "InsertEnter",
@@ -112,6 +118,7 @@ return {
   },
   {
     "xzbdmw/colorful-menu.nvim",
+    lazy = true,
     config = function()
       require("colorful-menu").setup({
         ls = {
@@ -144,6 +151,7 @@ return {
   },
   {
     "windwp/nvim-autopairs",
+    event = "InsertEnter",
     opts = {
       fast_wrap = {},
       disable_filetype = { "TelescopePrompt", "vim" },
@@ -152,7 +160,7 @@ return {
   },
   {
     "folke/todo-comments.nvim",
-    event = "VimEnter",
+    event = { "BufReadPost", "BufNewFile" },
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = { signs = false },
   },
@@ -174,7 +182,43 @@ return {
     cmd = { "OverseerRun", "OverseerToggle" },
     opts = {},
   },
-
+  {
+    "folke/trouble.nvim",
+    opts = {}, -- for default options, refer to the configuration section for custom setup.
+    cmd = "Trouble",
+    keys = {
+      {
+        "<leader>xx",
+        "<cmd>Trouble diagnostics toggle<cr>",
+        desc = "Diagnostics (Trouble)",
+      },
+      {
+        "<leader>xX",
+        "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+        desc = "Buffer Diagnostics (Trouble)",
+      },
+      {
+        "<leader>cs",
+        "<cmd>Trouble symbols toggle focus=false<cr>",
+        desc = "Symbols (Trouble)",
+      },
+      {
+        "<leader>cl",
+        "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+        desc = "LSP Definitions / references / ... (Trouble)",
+      },
+      {
+        "<leader>xL",
+        "<cmd>Trouble loclist toggle<cr>",
+        desc = "Location List (Trouble)",
+      },
+      {
+        "<leader>xQ",
+        "<cmd>Trouble qflist toggle<cr>",
+        desc = "Quickfix List (Trouble)",
+      },
+    },
+  },
   -----------------------------------------------------------------------------
   -- git
   -----------------------------------------------------------------------------
@@ -290,9 +334,17 @@ return {
   {
     "MironPascalCaseFan/debugmaster.nvim",
     dependencies = { "mfussenegger/nvim-dap" },
+    keys = {
+      {
+        "<leader>dd",
+        function() require("debugmaster").mode.toggle() end,
+        mode = { "n", "v" },
+        nowait = true,
+        desc = "Run Debugger"
+      },
+    },
     config = function()
       local dm = require("debugmaster")
-      vim.keymap.set({ "n", "v" }, "<leader>dd", dm.mode.toggle, { nowait = true }, {desc = "Run Debugger"})
       vim.keymap.set("t", "<C-\\>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
       dm.plugins.osv_integration.enabled = true
     end,
