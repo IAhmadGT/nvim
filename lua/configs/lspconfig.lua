@@ -52,7 +52,6 @@ end
 local function lsp_on_attach(ev)
   local client = vim.lsp.get_client_by_id(ev.data.client_id)
   local bufnr = ev.buf
-  local opts = { noremap = true, silent = true, buffer = bufnr }
 
   local function map(mode, lhs, rhs, desc)
     vim.keymap.set(mode, lhs, rhs, { noremap = true, silent = true, buffer = bufnr, desc = desc })
@@ -93,127 +92,123 @@ vim.keymap.set("n", "<leader>q", function() vim.diagnostic.setloclist({ open = t
 vim.api.nvim_create_autocmd("LspAttach", { callback = lsp_on_attach })
 
 -------------------------------------------------------------------------------
--- server configurations
+-- servers
 -------------------------------------------------------------------------------
--- Default capabilities from blink.cmp
-vim.lsp.config["*"] = {
-  capabilities = require("blink.cmp").get_lsp_capabilities(),
-}
-
--- Lua
-vim.lsp.config.lua_ls = {
-  settings = {
-    Lua = {
-      diagnostics = { globals = { "vim" } },
-      telemetry = { enable = false },
-    },
-  },
-}
-
--- C / C++
-vim.lsp.config.clangd = {
-  filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
-  cmd = {
-    "clangd",
-    "-j=4",
-    "--pch-storage=memory",
-    "--compile-commands-dir=build",
-    "--all-scopes-completion",
-    "--background-index",
-    "--clang-tidy",
-    "--completion-style=detailed",
-    "--header-insertion=iwyu",
-    "--limit-results=70",
-    "--log=error",
-    "--suggest-missing-includes",
-  },
-  root_markers = {
-    '.clangd',
-    '.clang-tidy',
-    '.clang-format',
-    'compile_commands.json',
-    'compile_flags.txt',
-    'configure.ac',
-    '.git',
-  },
-}
-
--- C#
-vim.lsp.config["roslyn"] = {
-    cmd = {
-        "roslyn-language-server",
-        "--stdio",
-     -- "--extension=/path/to/Roslynator.dll",
-    },
-}
-
--- Typst
-vim.lsp.config.tinymist = {
-  cmd = { "tinymist" },
-  filetypes = { "typst" },
-  settings = {},
-}
-
--- Assembly
-vim.lsp.config["asm-lsp"] = {
-  cmd = { "asm-lsp" },
-  filetypes = { "asm", "vmasm" },
-  root_markers = { ".git" },
-}
-
--- QML
-vim.lsp.config.qmlls = {
-  cmd = { "qmlls", "-E" },
-  filetypes = { "qml", "qmljs" },
-}
-
--- CMake 
-vim.lsp.config.neocmake = {
-  cmd = { "neocmakelsp", "stdio" },
-  filetypes = { "cmake" },
-  root_dir = require("lspconfig.util").root_pattern(
-    "CMakeLists.txt",
-    ".git"
-  ),
-}
-
--- GLSL
-vim.lsp.config["glsl_analyzer"] = {
-  cmd = { 'glsl_analyzer' },
-  filetypes = { 'glsl', 'vert', 'tesc', 'tese', 'frag', 'geom', 'comp' },
-  root_markers = { '.git' },
-  capabilities = {},
-}
 
 local servers = {
-  "lua_ls",
-  -- "bashls",
-  -- "cssls",
-  "neocmake",
-  -- "nixd",
-  -- "qmlls",
-  -- "tinymist",
-  "basedpyright",
-  -- "asm-lsp",
-  "glsl_analyzer"
+  lua_ls = {
+    settings = {
+      Lua = {
+        diagnostics = {
+          globals = { "vim" },
+        },
+        telemetry = {
+          enable = false,
+        },
+      },
+    },
+  },
+
+  clangd = {
+    filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+
+    cmd = {
+      "clangd",
+      "-j=4",
+      "--pch-storage=memory",
+      "--compile-commands-dir=build",
+      "--all-scopes-completion",
+      "--background-index",
+      "--clang-tidy",
+      "--completion-style=detailed",
+      "--header-insertion=iwyu",
+      "--limit-results=70",
+      "--log=error",
+      "--suggest-missing-includes",
+    },
+
+    root_markers = {
+      ".clangd",
+      ".clang-tidy",
+      ".clang-format",
+      "compile_commands.json",
+      "compile_flags.txt",
+      "configure.ac",
+      ".git",
+    },
+  },
+
+  roslyn = {
+    cmd = {
+      "roslyn-language-server",
+      "--stdio",
+      -- "--extension=/path/to/Roslynator.dll",
+    },
+  },
+
+  tinymist = {
+    cmd = { "tinymist" },
+    filetypes = { "typst" },
+    settings = {},
+  },
+
+  ["asm-lsp"] = {
+    cmd = { "asm-lsp" },
+    filetypes = { "asm", "vmasm" },
+    root_markers = { ".git" },
+  },
+
+  qmlls = {
+    cmd = { "qmlls", "-E" },
+    filetypes = { "qml", "qmljs" },
+  },
+
+  neocmake = {
+    cmd = { "neocmakelsp", "stdio" },
+
+    filetypes = { "cmake" },
+
+    root_markers = {
+      "CMakeLists.txt",
+      ".git",
+    },
+  },
+
+  glsl_analyzer = {
+    cmd = { "glsl_analyzer" },
+
+    filetypes = {
+      "glsl",
+      "vert",
+      "tesc",
+      "tese",
+      "frag",
+      "geom",
+      "comp",
+    },
+
+    root_markers = {
+      ".git",
+    },
+  },
+
+  basedpyright = {},
+
+  -- bashls = {},
+  -- cssls = {},
+  -- nixd = {},
 }
 
-for _, lsp in ipairs(servers) do
-  local default_config = require('lspconfig.configs.' .. lsp).default_config
-  vim.lsp.config[lsp] = vim.tbl_deep_extend("force", default_config, vim.lsp.config[lsp] or {})
+-------------------------------------------------------------------------------
+-- register configs
+-------------------------------------------------------------------------------
+
+for name, config in pairs(servers) do
+  vim.lsp.config[name] = config
 end
 
--- Enable all configured servers
-vim.lsp.enable({
-  "lua_ls",
-  -- "bashls",
-  "clangd",
-  -- "cssls",
-  "neocmake",
-  -- "nixd",
-  -- "qmlls",
-  "tinymist",
-  "basedpyright",
-  -- "asm-lsp",
-  "glsl_analyzer"
-})
+-------------------------------------------------------------------------------
+-- enable servers
+-------------------------------------------------------------------------------
+
+vim.lsp.enable(vim.tbl_keys(servers))
