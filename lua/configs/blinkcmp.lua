@@ -1,88 +1,172 @@
+local colorful_menu = require("colorful-menu")
+local highlight_colors = require("nvim-highlight-colors")
+
+-------------------------------------------------------------------------------
+-- colorful-menu helpers
+-------------------------------------------------------------------------------
+
+local function label_text(ctx)
+  local ok, text = pcall(colorful_menu.blink_components_text, ctx)
+
+  if ok and text then
+    return text
+  end
+
+  return ctx.label
+end
+
+local function label_highlights(ctx)
+  local highlights
+
+  local ok, result = pcall(colorful_menu.blink_highlights, ctx)
+
+  if ok and result then
+    highlights = result.highlights
+  end
+
+  if not highlights then
+    highlights = {
+      { 0, #ctx.label, group = "BlinkCmpLabel" },
+    }
+  end
+
+  -- restore fuzzy match highlights
+  for _, idx in ipairs(ctx.label_matched_indices) do
+    table.insert(highlights, {
+      idx,
+      idx + 1,
+      group = "BlinkCmpLabelMatch",
+    })
+  end
+
+  return highlights
+end
+
+-------------------------------------------------------------------------------
+-- color helpers
+-------------------------------------------------------------------------------
+
+local function color_item(ctx)
+  if ctx.item.source_name ~= "LSP" then
+    return nil
+  end
+
+  return highlight_colors.format(
+    ctx.item.documentation,
+    { kind = ctx.kind }
+  )
+end
+
+local function kind_icon_text(ctx)
+  local icon = ctx.kind_icon
+  local color = color_item(ctx)
+
+  if color and color.abbr ~= "" then
+    icon = color.abbr
+  end
+
+  return icon .. ctx.icon_gap
+end
+
+local function kind_icon_highlight(ctx)
+  local color = color_item(ctx)
+
+  if color and color.abbr_hl_group then
+    return color.abbr_hl_group
+  end
+
+  return "BlinkCmpKind" .. ctx.kind
+end
+
+-------------------------------------------------------------------------------
+-- blink config
+-------------------------------------------------------------------------------
+
 return {
-    keymap = {
-      preset = 'default',
-      ['<Tab>'] = { 'select_next', 'fallback' },
-      ['<S-Tab>'] = { 'select_prev', 'fallback' },
-      ['<CR>'] = { 'accept', 'fallback' },
+  keymap = {
+    preset = "default",
+
+    ["<Tab>"] = {
+      "select_next",
+      "fallback",
     },
 
-    appearance = {
-      nerd_font_variant = 'mono',
+    ["<S-Tab>"] = {
+      "select_prev",
+      "fallback",
     },
-    completion = {
-      ghost_text = {
-        enabled = true,
-        show_with_menu = true,
+
+    ["<CR>"] = {
+      "accept",
+      "fallback",
+    },
+  },
+
+  appearance = {
+    nerd_font_variant = "mono",
+  },
+
+  completion = {
+    ghost_text = {
+      enabled = true,
+      show_with_menu = true,
+    },
+
+    list = {
+      selection = {
+        preselect = true,
+        auto_insert = true,
       },
-      list = {
-        selection = {
-          preselect = true,
-          auto_insert = true,
+    },
+
+    documentation = {
+      auto_show = true,
+
+      window = {
+        border = "single",
+      },
+    },
+
+    menu = {
+      border = "single",
+
+      draw = {
+        columns = {
+          { "kind_icon", gap = 1 },
+          { "label", gap = 1 },
         },
-      },
-      documentation = {
-        auto_show = true,
-        window = { border = 'single' },
-      },
-      menu = {
-        border = 'single',
-        draw = {
-          columns = { { 'kind_icon', gap = 1 }, { 'label', gap = 1 } },
-          components = {
-            label = {
-              text = function(ctx)
-                return require("colorful-menu").blink_components_text(ctx)
-              end,
-              highlight = function(ctx)
-                local highlights = require("colorful-menu").blink_highlights(ctx)
-                if highlights == nil then
-                  -- Fallback if colorful-menu doesn't have data
-                  highlights = { { 0, #ctx.label, group = "BlinkCmpLabel" } }
-                else
-                  highlights = highlights.highlights
-                end
 
-                -- Re-insert fuzzy match highlights because we are overriding the highlight function
-                for _, idx in ipairs(ctx.label_matched_indices) do
-                  table.insert(highlights, { idx, idx + 1, group = "BlinkCmpLabelMatch" })
-                end
+        components = {
+          label = {
+            text = label_text,
+            highlight = label_highlights,
+          },
 
-                return highlights
-              end,
-            },
-
-            kind_icon = {
-              text = function(ctx)
-                local icon = ctx.kind_icon
-                if ctx.item.source_name == "LSP" then
-                  local color_item = require("nvim-highlight-colors").format(ctx.item.documentation, { kind = ctx.kind })
-                  if color_item and color_item.abbr ~= "" then
-                    icon = color_item.abbr
-                  end
-                end
-                return icon .. ctx.icon_gap
-              end,
-              highlight = function(ctx)
-                local highlight = "BlinkCmpKind" .. ctx.kind
-                if ctx.item.source_name == "LSP" then
-                  local color_item = require("nvim-highlight-colors").format(ctx.item.documentation, { kind = ctx.kind })
-                  if color_item and color_item.abbr_hl_group then
-                    highlight = color_item.abbr_hl_group
-                  end
-                end
-                return highlight
-              end,
-            },
+          kind_icon = {
+            text = kind_icon_text,
+            highlight = kind_icon_highlight,
           },
         },
       },
     },
-    sources = {
-      default = { 'lsp', 'path', 'snippets', 'buffer' },
-    },
+  },
 
-    fuzzy = {
-      implementation = "prefer_rust",
-      sorts = { 'exact', 'score', 'sort_text' },
+  sources = {
+    default = {
+      "lsp",
+      "path",
+      "snippets",
+      "buffer",
     },
+  },
+
+  fuzzy = {
+    implementation = "prefer_rust",
+
+    sorts = {
+      "exact",
+      "score",
+      "sort_text",
+    },
+  },
 }
