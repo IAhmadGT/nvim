@@ -1,7 +1,9 @@
 return
 {
+  sync_install = false,
   highlight = {
     enable = true,
+    additional_vim_regex_highlighting = true,
   },
   indent = {
     enable = true
@@ -29,4 +31,11 @@ return
     "bash",
     "nix"
   },
+  rainbow = {
+    enable = true,
+    extended_mode = true,
+    max_file_lines = nil,
+    -- colors = {},    
+    -- termcolors = {}
+  }
 }
