@@ -1,11 +1,152 @@
 -------------------------------------------------------------------------------
+-- servers
+-------------------------------------------------------------------------------
+
+local servers = {
+  lua_ls = {
+    settings = {
+      Lua = {
+        diagnostics = {
+          globals = { "vim" },
+        },
+        telemetry = {
+          enable = false,
+        },
+      },
+    },
+  },
+
+  clangd = {
+    cmd = {
+      "clangd",
+      "-j=2",
+      "--pch-storage=disk",
+      "--compile-commands-dir=build",
+      "--background-index",
+      "--clang-tidy",
+      "--completion-style=bundled",
+      "--header-insertion=never",
+      "--limit-results=50",
+      "--log=error",
+      "-query-driver=C:\\Tools\\LLVM\\bin\\clang*.exe,C:\\*\\bin\\clang*.exe",
+    },
+    filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+    root_markers = {
+      ".clangd",
+      ".clang-tidy",
+      ".clang-format",
+      "compile_commands.json",
+      "compile_flags.txt",
+      "configure.ac",
+      ".git",
+    },
+    capabilities = {
+      offsetEncoding = { "utf-16" },
+    },
+  },
+
+  roslyn = {
+    cmd = {
+      "roslyn-language-server",
+      "--stdio",
+      -- "--extension=/path/to/Roslynator.dll",
+    },
+  },
+
+  tinymist = {
+    cmd = { "tinymist" },
+    filetypes = { "typst" },
+    settings = {},
+  },
+
+  ["asm-lsp"] = {
+    cmd = { "asm-lsp" },
+    filetypes = { "asm", "vmasm" },
+    root_markers = { ".git" },
+  },
+
+  qmlls = {
+    cmd = { "qmlls", "-E" },
+    filetypes = { "qml", "qmljs" },
+  },
+
+  neocmake = {
+    cmd = { "neocmakelsp", "stdio" },
+    filetypes = { "cmake" },
+    root_markers = {
+      "CMakeLists.txt",
+      ".git",
+    },
+    init_options = {
+      semantic_token = true,
+    },
+  },
+
+  glsl_analyzer = {
+    cmd = { "glsl_analyzer" },
+    filetypes = {
+      "glsl",
+      "vert",
+      "tesc",
+      "tese",
+      "frag",
+      "geom",
+      "comp",
+    },
+    root_markers = {
+      ".git",
+    },
+  },
+
+  gdscript = {
+    cmd = vim.lsp.rpc.connect("127.0.0.1", 6005),
+    filetypes = { "gd", "gdscript", "gdshader" },
+    root_markers = { "project.godot" },
+  },
+
+  slangd = {
+    cmd = { 'slangd' },
+    filetypes = { 'hlsl', 'shaderslang' },
+    root_markers = { 'slangdconfig.json', '.clang-format', '.git' },
+  },
+
+  basedpyright = {
+    cmd = { 'basedpyright-langserver', '--stdio' },
+    filetypes = { 'python' },
+  },
+
+  Slint = {
+    cmd = {"slint-lsp"},
+    filetypes = { 'slint' },
+  }
+
+  -- bashls = {},
+  -- cssls = {},
+  -- nixd = {},
+}
+
+-------------------------------------------------------------------------------
+-- register configs
+-------------------------------------------------------------------------------
+
+for name, config in pairs(servers) do
+  vim.lsp.config[name] = config
+end
+
+-------------------------------------------------------------------------------
+-- enable servers
+-------------------------------------------------------------------------------
+
+vim.lsp.enable(vim.tbl_keys(servers))
+
+-------------------------------------------------------------------------------
 -- diagnostics & ui
 -------------------------------------------------------------------------------
 local diagnostic_signs = {
-  Error = " ",
-  Warn  = " ",
-  Hint  = " ",
-  Info  = " ",
+  Error = " ",
+  Warn  = " ",
+  Hint  = " ",
+  Info  = " ",
 }
 
 vim.diagnostic.config({
@@ -30,6 +171,17 @@ vim.diagnostic.config({
     style = "minimal",
   },
 })
+
+for _, group in ipairs({
+  "DiagnosticSignError",
+  "DiagnosticSignWarn",
+  "DiagnosticSignInfo",
+  "DiagnosticSignHint",
+}) do
+  local hl = vim.api.nvim_get_hl(0, { name = group })
+  hl.bold = true
+  vim.api.nvim_set_hl(0, group, hl)
+end
 
 -- Global hover/signature border override
 local orig_floating_preview = vim.lsp.util.open_floating_preview
@@ -90,125 +242,3 @@ vim.keymap.set("n", "<leader>q", function() vim.diagnostic.setloclist({ open = t
 
 -- Register the attach function
 vim.api.nvim_create_autocmd("LspAttach", { callback = lsp_on_attach })
-
--------------------------------------------------------------------------------
--- servers
--------------------------------------------------------------------------------
-
-local servers = {
-  lua_ls = {
-    settings = {
-      Lua = {
-        diagnostics = {
-          globals = { "vim" },
-        },
-        telemetry = {
-          enable = false,
-        },
-      },
-    },
-  },
-
-  clangd = {
-    filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
-
-    cmd = {
-      "clangd",
-      "-j=4",
-      "--pch-storage=memory",
-      "--compile-commands-dir=build",
-      "--all-scopes-completion",
-      "--background-index",
-      "--clang-tidy",
-      "--completion-style=detailed",
-      "--header-insertion=iwyu",
-      "--limit-results=70",
-      "--log=error",
-      "--suggest-missing-includes",
-    },
-
-    root_markers = {
-      ".clangd",
-      ".clang-tidy",
-      ".clang-format",
-      "compile_commands.json",
-      "compile_flags.txt",
-      "configure.ac",
-      ".git",
-    },
-  },
-
-  roslyn = {
-    cmd = {
-      "roslyn-language-server",
-      "--stdio",
-      -- "--extension=/path/to/Roslynator.dll",
-    },
-  },
-
-  tinymist = {
-    cmd = { "tinymist" },
-    filetypes = { "typst" },
-    settings = {},
-  },
-
-  ["asm-lsp"] = {
-    cmd = { "asm-lsp" },
-    filetypes = { "asm", "vmasm" },
-    root_markers = { ".git" },
-  },
-
-  qmlls = {
-    cmd = { "qmlls", "-E" },
-    filetypes = { "qml", "qmljs" },
-  },
-
-  neocmake = {
-    cmd = { "neocmakelsp", "stdio" },
-
-    filetypes = { "cmake" },
-
-    root_markers = {
-      "CMakeLists.txt",
-      ".git",
-    },
-  },
-
-  glsl_analyzer = {
-    cmd = { "glsl_analyzer" },
-
-    filetypes = {
-      "glsl",
-      "vert",
-      "tesc",
-      "tese",
-      "frag",
-      "geom",
-      "comp",
-    },
-
-    root_markers = {
-      ".git",
-    },
-  },
-
-  basedpyright = {},
-
-  -- bashls = {},
-  -- cssls = {},
-  -- nixd = {},
-}
-
--------------------------------------------------------------------------------
--- register configs
--------------------------------------------------------------------------------
-
-for name, config in pairs(servers) do
-  vim.lsp.config[name] = config
-end
-
--------------------------------------------------------------------------------
--- enable servers
--------------------------------------------------------------------------------
-
-vim.lsp.enable(vim.tbl_keys(servers))
