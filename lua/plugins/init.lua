@@ -7,20 +7,7 @@ return {
     name = "catppuccin",
     priority = 1000,
     config = function()
-      require("catppuccin").setup({
-        flavour = "mocha",
-        transparent_background = false,
-        no_italic = true,
-        integrations = {
-          treesitter = true,
-          blink_cmp = true,
-          gitsigns = true,
-          which_key = true,
-          indent_blankline = { enabled = true, scope_color = "lavender" },
-          native_lsp = { enabled = true },
-        },
-      })
-      vim.cmd.colorscheme "catppuccin"
+        return require "configs.catppuccin"
     end,
   },
   {
@@ -176,13 +163,6 @@ return {
     end,
   },
   {
-    'stevearc/overseer.nvim',
-    ---@module 'overseer'
-    ---@type overseer.SetupOpts
-    cmd = { "OverseerRun", "OverseerToggle" },
-    opts = {},
-  },
-  {
     "folke/trouble.nvim",
     opts = {}, -- for default options, refer to the configuration section for custom setup.
     cmd = "Trouble",
@@ -218,6 +198,72 @@ return {
         desc = "Quickfix List (Trouble)",
       },
     },
+  },
+  {
+    'Civitasv/cmake-tools.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim', 'stevearc/overseer.nvim' },
+    cmd = {
+      "CMakeGenerate",
+      "CMakeBuild",
+      "CMakeRun",
+      "CMakeDebug",
+      "CMakeClean",
+      "CMakeSelectBuildType",
+      "CMakeSelectKit",
+    },
+    opts = {
+      cmake_generate_options = { "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" },
+      cmake_build_directory = "build",
+      cmake_executor = {
+        name = "quickfix",
+        opts = {}
+      },
+      cmake_runner = {
+        name = "quickfix",
+        opts = {},
+      },
+    },
+    keys = {
+      { "<leader>cg", "<cmd>CMakeGenerate<cr>", desc = "CMake Generate" },
+      { "<leader>cb", "<cmd>CMakeBuild<cr>", desc = "CMake Build" },
+      { "<leader>cr", "<cmd>CMakeRun<cr>", desc = "CMake Run" },
+      { "<leader>cd", "<cmd>CMakeDebug<cr>", desc = "CMake Debug (DAP)" },
+      { "<leader>ck", "<cmd>CMakeSelectKit<cr>", desc = "CMake Select Kit" },
+      { "<leader>ct", "<cmd>CMakeSelectBuildType<cr>", desc = "CMake Select Build Type" },
+    }
+  },
+  {
+    'stevearc/overseer.nvim',
+    lazy = false,
+    opts = {
+      task_list = {
+      },
+    },
+  },
+  {
+    'stevearc/quicker.nvim',
+    ft = "qf",
+    ---@module "quicker"
+    ---@type quicker.SetupOptions
+    opts = {
+      buflisted = false,
+      wrap = true,
+      number = false,
+    },
+  },
+  {
+    'akinsho/toggleterm.nvim',
+    version = "*",
+    opts = {}
+  },
+  {
+    "kylechui/nvim-surround",
+    -- Optional: See `:h nvim-surround.configuration` and `:h nvim-surround.setup` for details
+    -- config = function()
+    --     require("nvim-surround").setup({
+    --         -- Put your configuration here
+    --     })
+    -- end
   },
   -----------------------------------------------------------------------------
   -- git
