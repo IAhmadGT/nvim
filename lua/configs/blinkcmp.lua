@@ -14,7 +14,6 @@ local function label_text(ctx)
 
   return ctx.label
 end
-
 local function label_highlights(ctx)
   local highlights
 
@@ -29,7 +28,6 @@ local function label_highlights(ctx)
       { 0, #ctx.label, group = "BlinkCmpLabel" },
     }
   end
-
   -- restore fuzzy match highlights
   for _, idx in ipairs(ctx.label_matched_indices) do
     table.insert(highlights, {
@@ -56,7 +54,6 @@ local function color_item(ctx)
     { kind = ctx.kind }
   )
 end
-
 local function kind_icon_text(ctx)
   local icon = ctx.kind_icon
   local color = color_item(ctx)
@@ -67,7 +64,6 @@ local function kind_icon_text(ctx)
 
   return icon .. ctx.icon_gap
 end
-
 local function kind_icon_highlight(ctx)
   local color = color_item(ctx)
 
@@ -85,17 +81,14 @@ end
 return {
   keymap = {
     preset = "default",
-
     ["<Tab>"] = {
       "select_next",
       "fallback",
     },
-
     ["<S-Tab>"] = {
       "select_prev",
       "fallback",
     },
-
     ["<CR>"] = {
       "accept",
       "fallback",
@@ -108,7 +101,7 @@ return {
 
   completion = {
     ghost_text = {
-      enabled = true,
+      enabled = false,
       show_with_menu = true,
     },
 
@@ -118,7 +111,6 @@ return {
         auto_insert = true,
       },
     },
-
     documentation = {
       auto_show = true,
 
@@ -126,22 +118,18 @@ return {
         border = "single",
       },
     },
-
     menu = {
       border = "single",
-
       draw = {
         columns = {
           { "kind_icon", gap = 1 },
           { "label", gap = 1 },
         },
-
         components = {
           label = {
             text = label_text,
             highlight = label_highlights,
           },
-
           kind_icon = {
             text = kind_icon_text,
             highlight = kind_icon_highlight,
@@ -150,19 +138,19 @@ return {
       },
     },
   },
-
   sources = {
-    default = {
-      "lsp",
-      "path",
-      "snippets",
-      "buffer",
-    },
+    default = { "lsp", "path", "snippets", "buffer", },
+    providers = {
+      lsp = {
+        name = 'LSP',
+        enabled = true,
+        module = 'blink.cmp.sources.lsp',
+        score_offset = 1000,
+      }
+    }
   },
-
   fuzzy = {
     implementation = "prefer_rust",
-
     sorts = {
       "exact",
       "score",
