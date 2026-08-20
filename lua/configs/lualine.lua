@@ -150,11 +150,11 @@ ins_right {
 ins_right {
   'diagnostics',
   sources = { 'nvim_diagnostic' },
-  symbols = { error = ' ', warn = ' ', info = ' ' },
+  symbols = { error = ' ', warn = ' ', info = ' ' },
   diagnostics_color = {
-    error = { fg = colors.red },
-    warn  = { fg = colors.yellow },
-    info  = { fg = colors.cyan },
+    error = { fg = colors.red, gui = 'bold'},
+    warn  = { fg = colors.yellow, gui = 'bold'},
+    info  = { fg = colors.cyan, gui = 'bold'},
   },
 }
 
