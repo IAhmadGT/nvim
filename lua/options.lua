@@ -1,9 +1,11 @@
 local opt = vim.opt
+local api = vim.api
 local g = vim.g
 
 -------------------------------------------------------------------------------
 -- general config
 -------------------------------------------------------------------------------
+
 g.mapleader = " "
 
 -- System Clipboard
@@ -25,6 +27,7 @@ vim.env.PATH = mason_path .. delim .. vim.env.PATH
 -------------------------------------------------------------------------------
 -- ui & appearance
 -------------------------------------------------------------------------------
+
 opt.termguicolors = true
 opt.laststatus = 3
 opt.showmode = false
@@ -43,29 +46,57 @@ opt.splitright = true
 
 opt.fillchars = { eob = " " }
 
+-- Enable undercurls
+api.nvim_set_var('t_Cs', [['\e[4:3m']])
+api.nvim_set_var('t_Ce', [['\e[4:0m']])
+
+-- UI2
+require('vim._core.ui2').enable({
+  enable = true,
+  msg = {
+    targets = 'cmd',
+    cmd = {
+      height = 0.5
+    },
+    dialog = {
+      height = 0.5,
+    },
+    msg = {
+      height = 0.5,
+      timeout = 4000,
+    },
+    pager = {
+      height = 1,
+    },
+  },
+})
+
 -------------------------------------------------------------------------------
 -- indentation & wrapping
 -------------------------------------------------------------------------------
+
 opt.expandtab = true
 opt.shiftwidth = 2
-opt.tabstop = 2
-opt.softtabstop = 2
+opt.tabstop = 4
+opt.softtabstop = 4
 opt.smartindent = true
 opt.wrap = false
 
 -------------------------------------------------------------------------------
 -- searching
 -------------------------------------------------------------------------------
+
 opt.ignorecase = true
 opt.smartcase = true
 
 -------------------------------------------------------------------------------
 -- autocommands
 -------------------------------------------------------------------------------
--- Highlight text on yank (copy)
-vim.api.nvim_create_autocmd('TextYankPost', {
+
+-- Highlight text on yank 
+api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking text',
-  group = vim.api.nvim_create_augroup('highlight-yank', { clear = true }),
+  group = api.nvim_create_augroup('highlight-yank', { clear = true }),
   callback = function()
     vim.hl.on_yank()
   end,
@@ -74,6 +105,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 -------------------------------------------------------------------------------
 -- filetypes
 ---------------------------------------------------------------------------------
+
 vim.filetype.add({
   extension = {
     vert = 'glsl',
@@ -83,5 +115,6 @@ vim.filetype.add({
     geom = 'glsl',
     comp = 'glsl',
     razor = 'razor',
+    qrc = 'xml',
   }
 })
