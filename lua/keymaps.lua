@@ -9,7 +9,7 @@ map("n", "<C-c>", "<cmd>%y+<CR>", { desc = "Copy whole file" })
 
 -- Toggles
 map("n", "<leader>n", "<cmd>set nu!<CR>", { desc = "Toggle line number" })
-map("n", "<leader>rn", "<cmd>set rnu!<CR>", { desc = "Toggle relative number" })
+map("n", "<leader>nr", "<cmd>set rnu!<CR>", { desc = "Toggle relative number" })
 
 -- Insert mode navigation
 map("i", "<C-b>", "<ESC>^i", { desc = "Move to beginning of line" })
@@ -18,6 +18,9 @@ map("i", "<C-h>", "<Left>", { desc = "Move left" })
 map("i", "<C-l>", "<Right>", { desc = "Move right" })
 map("i", "<C-j>", "<Down>", { desc = "Move down" })
 map("i", "<C-k>", "<Up>", { desc = "Move up" })
+
+-- Visual mode Pasting
+map("v", "p", "P");
 
 -------------------------------------------------------------------------------
 -- navigation & buffers
@@ -29,6 +32,7 @@ map("n", "<leader>v", "<cmd>Yazi<cr>", { desc = "Yazi (File Explorer)" })
 map("n", "<leader>]", "<cmd>bn<cr>", { desc = "Next buffer" })
 map("n", "<leader>[", "<cmd>bp<cr>", { desc = "Previous buffer" })
 map("n", "<leader>bd", "<cmd>bd<cr>", { desc = "Close current buffer" })
+map("n", "<leader>bfd", "<cmd>bd!<cr>", { desc = "Force close current buffer" })
 
 -- Comments (Uses Neovim 0.10+ builtin gc/gcc)
 map("n", "<leader>/", "gcc", { desc = "Toggle comment", remap = true })
@@ -74,9 +78,13 @@ map("n", "<leader>fsp", function()
 end, { desc = "Grep in Neovim config" })
 
 -- NixOS Config
--- map("n", "<leader>fn", function()
---   require("telescope.builtin").find_files({
---     cwd = "~/nixos/",
---     prompt_title = "NixOS Config",
---   })
--- end, { desc = "Search NixOS config" })
+local is_nixos = vim.fn.has("linux") == 1 and vim.fn.filereadable("/etc/NIXOS") == 1
+
+if is_nixos then
+  map("n", "<leader>fn", function()
+    require("telescope.builtin").find_files({
+      cwd = "~/nixos/",
+      prompt_title = "NixOS Config",
+    })
+  end, { desc = "Search NixOS config" })
+end
